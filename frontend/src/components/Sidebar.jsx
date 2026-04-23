@@ -5,7 +5,10 @@ import { LayoutDashboard, ShoppingCart, CreditCard, Users, Package, LogOut } fro
 const Sidebar = ({ onLogout }) => {
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">Vellor Perfumes</div>
+      <div className="sidebar-logo">
+        <div style={{ color: 'var(--primary-color)' }}>VELLOR</div>
+        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', letterSpacing: '0.2em', marginTop: '0.25rem', fontFamily: 'var(--font-base)' }}>INVENTORY SUITE</div>
+      </div>
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
         <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <LayoutDashboard size={20} />
