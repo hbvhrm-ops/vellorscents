@@ -15,16 +15,16 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Perfume Sales API")
 
-# Configure CORS for React frontend (Vite defaults to 5173)
+# CORS — allow the Render frontend URL and local dev
+origins = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Since it's standalone, allow all
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# --- Removed root endpoint to allow React index.html to be served on root ---
 
 # --- PRODUCTS ---
 @app.post("/products/", response_model=schemas.Product)
@@ -116,73 +116,30 @@ def pay_debt(sale_id: int, amount: float, db: Session = Depends(get_db)):
     if not sale:
         raise HTTPException(status_code=404, detail="Sale not found")
     if sale.amount_paid + amount > sale.total_price:
-        sale.amount_paid = sale.total_price # Cap it
+        sale.amount_paid = sale.total_price
     else:
         sale.amount_paid += amount
     db.commit()
     db.refresh(sale)
     return {"message": "Payment recorded", "sale": sale}
 
-# --- STATIC FRONTEND ASSETS ---
-if getattr(sys, 'frozen', False):
-    frontend_dist = os.path.join(sys._MEIPASS, "dist")
-else:
+# --- SERVE STATIC FRONTEND (local dev only) ---
+if not os.environ.get("DATABASE_URL"):
     frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+    if os.path.exists(frontend_dist):
+        assets_dir = os.path.join(frontend_dist, "assets")
+        if os.path.exists(assets_dir):
+            app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
-if os.path.exists(frontend_dist):
-    assets_dir = os.path.join(frontend_dist, "assets")
-    if os.path.exists(assets_dir):
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
-
-    @app.get("/{full_path:path}")
-    def serve_frontend(full_path: str):
-        # Allow specific API 404 paths to fail gracefully instead of returning HTML
-        if full_path.split("/")[0] in ["products", "sales", "resellers", "debts"]:
-            raise HTTPException(status_code=404, detail="API Route Not Found")
-        
-        file_path = os.path.join(frontend_dist, full_path)
-        if os.path.isfile(file_path):
-            return FileResponse(file_path)
-            
-        return FileResponse(os.path.join(frontend_dist, "index.html"))
+        @app.get("/{full_path:path}")
+        def serve_frontend(full_path: str):
+            if full_path.split("/")[0] in ["products", "sales", "resellers", "debts"]:
+                raise HTTPException(status_code=404, detail="API Route Not Found")
+            file_path = os.path.join(frontend_dist, full_path)
+            if os.path.isfile(file_path):
+                return FileResponse(file_path)
+            return FileResponse(os.path.join(frontend_dist, "index.html"))
 
 if __name__ == "__main__":
     import uvicorn
-    import threading
-    import sys
-    import socket
-    import time
-    from PyQt6.QtCore import QUrl
-    from PyQt6.QtWidgets import QApplication
-    from PyQt6.QtWebEngineWidgets import QWebEngineView
-
-    def get_free_port():
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(("", 0))
-            return s.getsockname()[1]
-            
-    # For development (not frozen), use 8000 so Vite works seamlessly. 
-    # For production (frozen), dynamically allocate port to avoid conflicts.
-    port = get_free_port() if getattr(sys, 'frozen', False) else 8000
-
-    def run_server():
-        uvicorn.run(app, host="127.0.0.1", port=port, log_level="critical")
-        
-    server_thread = threading.Thread(target=run_server, daemon=True)
-    server_thread.start()
-    
-    url = f"http://127.0.0.1:{port}/"
-
-    # Give server a moment to start before opening UI
-    time.sleep(0.5)
-
-    qapp = QApplication(sys.argv)
-    
-    # QWebEngineView renders the React frontend as a desktop app
-    view = QWebEngineView()
-    view.setWindowTitle("Vellor Perfumes")
-    view.resize(1200, 800)
-    view.load(QUrl(url))
-    view.show()
-    
-    sys.exit(qapp.exec())
+    uvicorn.run(app, host="0.0.0.0", port=8000)

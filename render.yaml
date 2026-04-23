@@ -1,0 +1,29 @@
+services:
+  # --- Backend: FastAPI on Render Web Service ---
+  - type: web
+    name: vellor-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r ../requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false   # You will paste this from Neon Tech dashboard
+      - key: ALLOWED_ORIGINS
+        sync: false   # Paste your Render frontend URL here after it's created
+                      # Example: https://vellor-frontend.onrender.com
+
+  # --- Frontend: React/Vite on Render Static Site ---
+  - type: static
+    name: vellor-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false   # Paste your Render backend URL here
+                      # Example: https://vellor-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

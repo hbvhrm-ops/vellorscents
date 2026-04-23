@@ -23,3 +23,17 @@ Thumbs.db
 # Node.js
 node_modules/
 frontend/node_modules/
+
+# Frontend build output
+frontend/dist/
+
+# Environment variable files (contain secrets)
+.env
+.env.local
+.env.production
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# Local SQLite data folder (dev only)
+backend/data/
