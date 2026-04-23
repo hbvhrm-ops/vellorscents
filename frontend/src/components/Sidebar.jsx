@@ -1,12 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ShoppingCart, CreditCard, Users, Package } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, CreditCard, Users, Package, LogOut } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar = ({ onLogout }) => {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">Vellor Perfumes</div>
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
         <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
@@ -28,6 +28,17 @@ const Sidebar = () => {
           <span>Resellers</span>
         </NavLink>
       </nav>
+      
+      <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>
+        <button 
+          onClick={onLogout} 
+          className="nav-item" 
+          style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--danger)' }}
+        >
+          <LogOut size={20} />
+          <span>Log Out</span>
+        </button>
+      </div>
     </aside>
   );
 };
