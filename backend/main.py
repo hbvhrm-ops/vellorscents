@@ -1,5 +1,9 @@
 import os
 import sys
+
+# Ensure the backend directory is always in the Python path,
+# regardless of which directory uvicorn is launched from.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
