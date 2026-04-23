@@ -40,7 +40,7 @@ const Debts = () => {
     <div className="animate-fade">
       <div className="flex-between" style={{ marginBottom: '2rem' }}>
         <div>
-          <h1>Debt Management</h1>
+          <h1>Debt</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Track unpaid invoices and register payments.</p>
         </div>
         <div className="glass-panel" style={{ padding: '0.75rem 1.5rem' }}>

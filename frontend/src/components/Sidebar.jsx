@@ -21,7 +21,7 @@ const Sidebar = ({ onLogout }) => {
         </NavLink>
         <NavLink to="/debts" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <CreditCard size={20} />
-          <span>Debt Management</span>
+          <span>Debt</span>
         </NavLink>
         <NavLink to="/resellers" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <Users size={20} />
