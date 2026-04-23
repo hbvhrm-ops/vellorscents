@@ -371,6 +371,7 @@ h1 {
     width: 100%;
   }
   
+  .premium-table tr {
     margin-bottom: 1rem;
     border: 1px solid var(--surface-border);
     border-radius: 8px;
