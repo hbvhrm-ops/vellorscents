@@ -172,11 +172,11 @@ const Products = () => {
           <tbody>
             {products.map(product => (
               <tr key={product.id}>
-                <td>{product.id}</td>
-                <td>{product.name}</td>
-                <td>PKR {product.cost_price.toFixed(2)} / PKR {product.price.toFixed(2)}</td>
-                <td>PKR {(product.wholesale_cost_price || 0).toFixed(2)} / PKR {(product.wholesale_price || 0).toFixed(2)}</td>
-                <td>
+                <td data-label="ID">{product.id}</td>
+                <td data-label="Perfume Name">{product.name}</td>
+                <td data-label="Reg Cost / Price">PKR {product.cost_price.toFixed(2)} / PKR {product.price.toFixed(2)}</td>
+                <td data-label="Wholesale Cost / Price">PKR {(product.wholesale_cost_price || 0).toFixed(2)} / PKR {(product.wholesale_price || 0).toFixed(2)}</td>
+                <td data-label="Actions">
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button className="btn btn-outline" style={{ padding: '0.4rem' }} onClick={() => handleEdit(product)} title="Edit">
                       <Edit size={16} />
@@ -189,7 +189,7 @@ const Products = () => {
               </tr>
             ))}
             {products.length === 0 && (
-              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No perfumes added yet.</td></tr>
+              <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-secondary)' }} data-label="Empty">No perfumes added yet.</td></tr>
             )}
           </tbody>
         </table>

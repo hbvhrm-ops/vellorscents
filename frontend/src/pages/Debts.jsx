@@ -68,12 +68,12 @@ const Debts = () => {
               const owed = sale.total_price - sale.amount_paid;
               return (
                 <tr key={sale.id}>
-                  <td>{format(new Date(sale.date), 'MMM dd, yyyy')}</td>
-                  <td>{sale.customer_name}</td>
-                  <td>PKR {sale.total_price.toFixed(2)}</td>
-                  <td className="text-success">PKR {sale.amount_paid.toFixed(2)}</td>
-                  <td className="text-danger" style={{ fontWeight: 'bold' }}>PKR {owed.toFixed(2)}</td>
-                  <td>
+                  <td data-label="Date">{format(new Date(sale.date), 'MMM dd, yyyy')}</td>
+                  <td data-label="Customer">{sale.customer_name}</td>
+                  <td data-label="Total (PKR)">PKR {sale.total_price.toFixed(2)}</td>
+                  <td className="text-success" data-label="Paid (PKR)">PKR {sale.amount_paid.toFixed(2)}</td>
+                  <td className="text-danger" style={{ fontWeight: 'bold' }} data-label="Remaining (PKR)">PKR {owed.toFixed(2)}</td>
+                  <td data-label="Action">
                     <button 
                       className="btn btn-outline" 
                       style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
@@ -86,7 +86,7 @@ const Debts = () => {
               )
             })}
             {debts.length === 0 && (
-              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Hooray! No outstanding debts.</td></tr>
+              <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-secondary)' }} data-label="Empty">Hooray! No outstanding debts.</td></tr>
             )}
           </tbody>
         </table>

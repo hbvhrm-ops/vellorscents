@@ -359,4 +359,43 @@ h1 {
   .glass-panel {
     padding: 1rem;
   }
+
+  /* Responsive Tables as Cards */
+  .premium-table thead {
+    display: none;
+  }
+  
+  .premium-table, .premium-table tbody, .premium-table tr, .premium-table td {
+    display: block;
+    width: 100%;
+  }
+  
+  .premium-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.5);
+  }
+  
+  .premium-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.85rem;
+  }
+  
+  .premium-table td:last-child {
+    border-bottom: none;
+  }
+  
+  .premium-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: left;
+    margin-right: 1rem;
+  }
 }

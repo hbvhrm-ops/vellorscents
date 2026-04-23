@@ -390,24 +390,24 @@ const Sales = () => {
               const status = sale.amount_paid >= sale.total_price ? 'Paid' : 'Debt';
               return (
                 <tr key={sale.id}>
-                  <td>{format(new Date(sale.date), 'MMM dd, yyyy HH:mm')}</td>
-                  <td>
+                  <td data-label="Date">{format(new Date(sale.date), 'MMM dd, yyyy HH:mm')}</td>
+                  <td data-label="Customer / Route">
                     {sale.customer_name || 'Unknown'}
                     {sale.reseller_id && (
                       <div style={{ fontSize: '0.8rem', color: 'var(--primary-color)' }}>Via Reseller #{sale.reseller_id}</div>
                     )}
                   </td>
-                  <td>{sale.perfume_name || 'Unknown'}</td>
-                  <td>{sale.quantity}</td>
-                  <td>{sale.discount > 0 ? `PKR ${sale.discount.toFixed(2)}` : '-'}</td>
-                  <td>PKR {sale.total_price.toFixed(2)}</td>
-                  <td>PKR {sale.amount_paid.toFixed(2)}</td>
-                  <td>
+                  <td data-label="Perfume">{sale.perfume_name || 'Unknown'}</td>
+                  <td data-label="Qty">{sale.quantity}</td>
+                  <td data-label="Discount">{sale.discount > 0 ? `PKR ${sale.discount.toFixed(2)}` : '-'}</td>
+                  <td data-label="Total (PKR)">PKR {sale.total_price.toFixed(2)}</td>
+                  <td data-label="Paid (PKR)">PKR {sale.amount_paid.toFixed(2)}</td>
+                  <td data-label="Status">
                     <span className={`badge ${status === 'Paid' ? 'badge-success' : 'badge-warning'}`}>
                       {status}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Actions">
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button className="btn btn-outline" style={{ padding: '0.4rem' }} onClick={() => handleEdit(sale)} title="Edit">
                       <Edit size={16} />
@@ -421,7 +421,7 @@ const Sales = () => {
               )
             })}
             {sales.length === 0 && (
-              <tr><td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No sales recorded yet.</td></tr>
+              <tr><td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-secondary)' }} data-label="Empty">No sales recorded yet.</td></tr>
             )}
           </tbody>
         </table>

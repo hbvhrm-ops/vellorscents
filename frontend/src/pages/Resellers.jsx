@@ -114,15 +114,15 @@ const Resellers = () => {
             <tbody>
               {currentResellerSales.map(sale => (
                 <tr key={sale.id}>
-                  <td>{format(new Date(sale.date), 'MMM dd, yyyy')}</td>
-                  <td>{sale.customer_name || 'Stock Consignment'}</td>
-                  <td>{sale.quantity}</td>
-                  <td>PKR {sale.total_price.toFixed(2)}</td>
-                  <td>PKR {sale.amount_paid.toFixed(2)}</td>
+                  <td data-label="Date">{format(new Date(sale.date), 'MMM dd, yyyy')}</td>
+                  <td data-label="End Customer">{sale.customer_name || 'Stock Consignment'}</td>
+                  <td data-label="Qty">{sale.quantity}</td>
+                  <td data-label="Total (PKR)">PKR {sale.total_price.toFixed(2)}</td>
+                  <td data-label="Paid (PKR)">PKR {sale.amount_paid.toFixed(2)}</td>
                 </tr>
               ))}
               {currentResellerSales.length === 0 && (
-                <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No sales or stock assigned yet.</td></tr>
+                <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-secondary)' }} data-label="Empty">No sales or stock assigned yet.</td></tr>
               )}
             </tbody>
           </table>
