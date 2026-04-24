@@ -12,19 +12,19 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const loggedInStatus = localStorage.getItem('isAdminLoggedIn');
+    const loggedInStatus = sessionStorage.getItem('isAdminLoggedIn');
     if (loggedInStatus === 'true') {
       setIsLoggedIn(true);
     }
   }, []);
 
   const handleLogin = () => {
-    localStorage.setItem('isAdminLoggedIn', 'true');
+    sessionStorage.setItem('isAdminLoggedIn', 'true');
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isAdminLoggedIn');
+    sessionStorage.removeItem('isAdminLoggedIn');
     setIsLoggedIn(false);
   };
 
