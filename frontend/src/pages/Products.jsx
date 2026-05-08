@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { apiService } from '../api';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 
-const Products = () => {
+const Products = ({ userRole }) => {
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -81,13 +81,15 @@ const Products = () => {
           <h1>Perfumes / Inventory</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Manage your catalog, costs, and selling prices.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => {
-          setEditId(null);
-          setFormData({ name: '', cost_price: 0, wholesale_cost_price: 0, wholesale_price: 0, price: 0 });
-          setShowForm(!showForm);
-        }}>
-          <Plus size={18} /> {showForm && !editId ? 'Cancel' : 'Add Perfume'}
-        </button>
+        {userRole === 'admin' && (
+          <button className="btn btn-primary" onClick={() => {
+            setEditId(null);
+            setFormData({ name: '', cost_price: 0, wholesale_cost_price: 0, wholesale_price: 0, price: 0 });
+            setShowForm(!showForm);
+          }}>
+            <Plus size={18} /> {showForm && !editId ? 'Cancel' : 'Add Perfume'}
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -164,9 +166,9 @@ const Products = () => {
             <tr>
               <th>ID</th>
               <th>Perfume Name</th>
-              <th>Reg Cost / Price</th>
-              <th>Wholesale Cost / Price</th>
-              <th>Actions</th>
+              {userRole === 'admin' ? <th>Reg Cost / Price</th> : <th>Selling Price</th>}
+              {userRole === 'admin' ? <th>Wholesale Cost / Price</th> : <th>Wholesale Price</th>}
+              {userRole === 'admin' && <th>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -174,18 +176,28 @@ const Products = () => {
               <tr key={product.id}>
                 <td data-label="ID">{product.id}</td>
                 <td data-label="Perfume Name">{product.name}</td>
-                <td data-label="Reg Cost / Price">PKR {product.cost_price.toFixed(2)} / PKR {product.price.toFixed(2)}</td>
-                <td data-label="Wholesale Cost / Price">PKR {(product.wholesale_cost_price || 0).toFixed(2)} / PKR {(product.wholesale_price || 0).toFixed(2)}</td>
-                <td data-label="Actions">
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn btn-outline" style={{ padding: '0.4rem' }} onClick={() => handleEdit(product)} title="Edit">
-                      <Edit size={16} />
-                    </button>
-                    <button className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleDelete(product.id)} title="Delete">
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
+                {userRole === 'admin' ? (
+                   <td data-label="Reg Cost / Price">PKR {product.cost_price.toFixed(2)} / PKR {product.price.toFixed(2)}</td>
+                ) : (
+                   <td data-label="Selling Price">PKR {product.price.toFixed(2)}</td>
+                )}
+                {userRole === 'admin' ? (
+                   <td data-label="Wholesale Cost / Price">PKR {(product.wholesale_cost_price || 0).toFixed(2)} / PKR {(product.wholesale_price || 0).toFixed(2)}</td>
+                ) : (
+                   <td data-label="Wholesale Price">PKR {(product.wholesale_price || 0).toFixed(2)}</td>
+                )}
+                {userRole === 'admin' && (
+                  <td data-label="Actions">
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="btn btn-outline" style={{ padding: '0.4rem' }} onClick={() => handleEdit(product)} title="Edit">
+                        <Edit size={16} />
+                      </button>
+                      <button className="btn btn-outline" style={{ padding: '0.4rem', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleDelete(product.id)} title="Delete">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
             {products.length === 0 && (

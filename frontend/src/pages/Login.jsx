@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { Lock } from 'lucide-react';
+import { apiService } from '../api';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username === '69' && password === '69') {
-      setError('');
-      onLogin();
-    } else {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await apiService.authLogin({ username, password });
+      onLogin(res.data.role, res.data.reseller_id);
+    } catch (err) {
       setError('Invalid username or password');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,8 +73,8 @@ const Login = ({ onLogin }) => {
             />
           </div>
           
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem', padding: '1rem' }}>
-            Login to Terminal
+          <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', marginTop: '0.5rem', padding: '1rem' }}>
+            {loading ? 'Logging in...' : 'Login to Terminal'}
           </button>
         </form>
       </div>

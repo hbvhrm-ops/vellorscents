@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 import models, schemas
 from database import engine, get_db
@@ -29,6 +29,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- AUTH ---
+@app.post("/auth/login", response_model=schemas.LoginResponse)
+def login(request: schemas.LoginRequest, db: Session = Depends(get_db)):
+    if request.username == "69" and request.password == "69":
+        return {"role": "admin", "reseller_id": None}
+    
+    reseller = db.query(models.Reseller).filter(
+        models.Reseller.username == request.username,
+        models.Reseller.password == request.password
+    ).first()
+    
+    if reseller:
+        return {"role": "reseller", "reseller_id": reseller.id}
+    
+    raise HTTPException(status_code=401, detail="Invalid username or password")
 
 # --- PRODUCTS ---
 @app.post("/products/", response_model=schemas.Product)
@@ -76,6 +92,28 @@ def create_reseller(reseller: schemas.ResellerCreate, db: Session = Depends(get_
 def read_resellers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return db.query(models.Reseller).offset(skip).limit(limit).all()
 
+@app.delete("/resellers/{reseller_id}")
+def delete_reseller(reseller_id: int, db: Session = Depends(get_db)):
+    db_reseller = db.query(models.Reseller).filter(models.Reseller.id == reseller_id).first()
+    if not db_reseller:
+        raise HTTPException(status_code=404, detail="Reseller not found")
+    # optionally set reseller_id to null in sales
+    db.query(models.Sale).filter(models.Sale.reseller_id == reseller_id).update({"reseller_id": None})
+    db.delete(db_reseller)
+    db.commit()
+    return {"detail": "Reseller deleted successfully"}
+
+@app.put("/resellers/{reseller_id}", response_model=schemas.Reseller)
+def update_reseller(reseller_id: int, reseller: schemas.ResellerCreate, db: Session = Depends(get_db)):
+    db_reseller = db.query(models.Reseller).filter(models.Reseller.id == reseller_id).first()
+    if not db_reseller:
+        raise HTTPException(status_code=404, detail="Reseller not found")
+    for key, value in reseller.model_dump().items():
+        setattr(db_reseller, key, value)
+    db.commit()
+    db.refresh(db_reseller)
+    return db_reseller
+
 # --- SALES ---
 @app.post("/sales/", response_model=schemas.Sale)
 def create_sale(sale: schemas.SaleCreate, db: Session = Depends(get_db)):
@@ -86,8 +124,11 @@ def create_sale(sale: schemas.SaleCreate, db: Session = Depends(get_db)):
     return db.query(models.Sale).filter(models.Sale.id == db_sale.id).first()
 
 @app.get("/sales/", response_model=List[schemas.Sale])
-def read_sales(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return db.query(models.Sale).order_by(models.Sale.date.desc()).offset(skip).limit(limit).all()
+def read_sales(skip: int = 0, limit: int = 100, reseller_id: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(models.Sale)
+    if reseller_id is not None:
+        query = query.filter(models.Sale.reseller_id == reseller_id)
+    return query.order_by(models.Sale.date.desc()).offset(skip).limit(limit).all()
 
 @app.put("/sales/{sale_id}", response_model=schemas.Sale)
 def update_sale(sale_id: int, sale: schemas.SaleCreate, db: Session = Depends(get_db)):
@@ -111,8 +152,11 @@ def delete_sale(sale_id: int, db: Session = Depends(get_db)):
 
 # --- DEBTS ---
 @app.get("/debts/", response_model=List[schemas.Sale])
-def read_debts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return db.query(models.Sale).filter(models.Sale.total_price > models.Sale.amount_paid).order_by(models.Sale.date.desc()).offset(skip).limit(limit).all()
+def read_debts(skip: int = 0, limit: int = 100, reseller_id: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(models.Sale).filter(models.Sale.total_price > models.Sale.amount_paid)
+    if reseller_id is not None:
+        query = query.filter(models.Sale.reseller_id == reseller_id)
+    return query.order_by(models.Sale.date.desc()).offset(skip).limit(limit).all()
 
 @app.post("/sales/{sale_id}/pay/")
 def pay_debt(sale_id: int, amount: float, db: Session = Depends(get_db)):

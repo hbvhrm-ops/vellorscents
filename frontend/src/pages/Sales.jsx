@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Plus, Download, Edit, Trash2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-const Sales = () => {
+const Sales = ({ userRole, resellerId }) => {
   const [sales, setSales] = useState([]);
   const [resellers, setResellers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -33,7 +33,7 @@ const Sales = () => {
 
   const fetchSales = async () => {
     try {
-      const res = await apiService.getSales();
+      const res = await apiService.getSales(userRole === 'reseller' ? resellerId : null);
       setSales(res.data);
     } catch (err) {
       console.error(err);
@@ -113,8 +113,8 @@ const Sales = () => {
 
       setShowForm(false);
       setEditId(null);
-      setFormData({ customer_name: '', perfume_name: '', quantity: 1, total_price: 0, amount_paid: 0, reseller_id: '', product_id: '', total_cost: 0, discount: 0, custom_unit_cost: '' });
-      setSaleType('direct');
+      setFormData({ customer_name: '', perfume_name: '', quantity: 1, total_price: 0, amount_paid: 0, reseller_id: userRole === 'reseller' ? resellerId : '', product_id: '', total_cost: 0, discount: 0, custom_unit_cost: '' });
+      setSaleType(userRole === 'reseller' ? 'reseller' : 'direct');
       fetchSales();
     } catch (err) {
       console.error(err);
@@ -123,7 +123,7 @@ const Sales = () => {
   };
 
   const handleEdit = (sale) => {
-    setSaleType(sale.reseller_id ? 'reseller' : 'direct');
+    setSaleType(userRole === 'reseller' ? 'reseller' : (sale.reseller_id ? 'reseller' : 'direct'));
     setFormData({
       customer_name: sale.customer_name || '',
       perfume_name: sale.perfume_name || '',
@@ -196,8 +196,8 @@ const Sales = () => {
           </button>
           <button className="btn btn-primary" onClick={() => {
             setEditId(null);
-            setFormData({ customer_name: '', perfume_name: '', quantity: 1, total_price: 0, amount_paid: 0, reseller_id: '', product_id: '', total_cost: 0, discount: 0, custom_unit_cost: '' });
-            setSaleType('direct');
+            setFormData({ customer_name: '', perfume_name: '', quantity: 1, total_price: 0, amount_paid: 0, reseller_id: userRole === 'reseller' ? resellerId : '', product_id: '', total_cost: 0, discount: 0, custom_unit_cost: '' });
+            setSaleType(userRole === 'reseller' ? 'reseller' : 'direct');
             setShowForm(!showForm);
           }}>
             <Plus size={18} /> {showForm && !editId ? 'Cancel' : 'New Sale'}
@@ -209,6 +209,7 @@ const Sales = () => {
         <div className="glass-panel" style={{ marginBottom: '2rem' }}>
           <h3>{editId ? 'Edit Sale' : 'Add New Sale'}</h3>
           <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
+            {userRole === 'admin' && (
             <div className="form-group" style={{ marginBottom: '1.5rem', flexDirection: 'row', gap: '1.5rem' }}>
               <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <input 
@@ -235,9 +236,10 @@ const Sales = () => {
                 /> Via Reseller
               </label>
             </div>
+            )}
 
             <div className="grid-2">
-              {saleType === 'reseller' && (
+              {saleType === 'reseller' && userRole === 'admin' && (
                 <div className="form-group">
                   <label className="form-label">Select Reseller</label>
                   <select 
@@ -323,6 +325,7 @@ const Sales = () => {
                   }}
                 />
               </div>
+              {userRole === 'admin' && (
               <div className="form-group">
                 <label className="form-label">Override Cost Price (Optional)</label>
                 <input 
@@ -340,6 +343,7 @@ const Sales = () => {
                   }}
                 />
               </div>
+              )}
               <div className="form-group">
                 <label className="form-label">Total Price (PKR)</label>
                 <input 

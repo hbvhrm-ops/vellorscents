@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, ShoppingCart, CreditCard, Users, Package, LogOut } from 'lucide-react';
 
-const Sidebar = ({ onLogout }) => {
+const Sidebar = ({ onLogout, userRole }) => {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -26,10 +26,12 @@ const Sidebar = ({ onLogout }) => {
           <CreditCard size={20} />
           <span>Debt</span>
         </NavLink>
-        <NavLink to="/resellers" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <Users size={20} />
-          <span>Resellers</span>
-        </NavLink>
+        {userRole === 'admin' && (
+          <NavLink to="/resellers" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <Users size={20} />
+            <span>Resellers</span>
+          </NavLink>
+        )}
       </nav>
       
       <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--surface-border)' }}>

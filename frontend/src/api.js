@@ -9,19 +9,24 @@ const api = axios.create({
 });
 
 export const apiService = {
+  // Auth
+  authLogin: (data) => api.post('/auth/login', data),
+
   // Sales
-  getSales: () => api.get('/sales/'),
+  getSales: (resellerId) => api.get('/sales/', { params: { reseller_id: resellerId } }),
   createSale: (data) => api.post('/sales/', data),
   updateSale: (id, data) => api.put(`/sales/${id}`, data),
   deleteSale: (id) => api.delete(`/sales/${id}`),
   
   // Debts (Unpaid Sales)
-  getDebts: () => api.get('/debts/'),
+  getDebts: (resellerId) => api.get('/debts/', { params: { reseller_id: resellerId } }),
   payDebt: (id, amount) => api.post(`/sales/${id}/pay/`, null, { params: { amount } }),
 
   // Resellers
   getResellers: () => api.get('/resellers/'),
   createReseller: (data) => api.post('/resellers/', data),
+  updateReseller: (id, data) => api.put(`/resellers/${id}`, data),
+  deleteReseller: (id) => api.delete(`/resellers/${id}`),
 
   // Products
   getProducts: () => api.get('/products/'),

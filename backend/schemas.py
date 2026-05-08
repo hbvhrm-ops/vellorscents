@@ -21,6 +21,8 @@ class Product(ProductBase):
 class ResellerBase(BaseModel):
     name: str
     contact: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
 
 class ResellerCreate(ResellerBase):
     pass
@@ -53,3 +55,11 @@ class Sale(SaleBase):
 
     class Config:
         from_attributes = True
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class LoginResponse(BaseModel):
+    role: str
+    reseller_id: Optional[int] = None

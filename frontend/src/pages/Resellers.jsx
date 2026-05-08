@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../api';
-import { UserPlus, X } from 'lucide-react';
+import { UserPlus, X, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 const Resellers = () => {
   const [resellers, setResellers] = useState([]);
   const [sales, setSales] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ name: '', contact: '' });
+  const [editId, setEditId] = useState(null);
+  const [formData, setFormData] = useState({ name: '', contact: '', username: '', password: '' });
+  
+  const generateCredentials = () => {
+    const randomUser = 'reseller_' + Math.floor(1000 + Math.random() * 9000);
+    const randomPass = Math.random().toString(36).slice(-8);
+    setFormData(prev => ({ ...prev, username: randomUser, password: randomPass }));
+  };
   
   const [selectedReseller, setSelectedReseller] = useState(null);
 
@@ -37,12 +44,43 @@ const Resellers = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await apiService.createReseller(formData);
+      if (editId) {
+        await apiService.updateReseller(editId, formData);
+      } else {
+        await apiService.createReseller(formData);
+      }
       setShowForm(false);
-      setFormData({ name: '', contact: '' });
+      setEditId(null);
+      setFormData({ name: '', contact: '', username: '', password: '' });
       fetchResellers();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleEdit = (reseller) => {
+    setFormData({
+      name: reseller.name || '',
+      contact: reseller.contact || '',
+      username: reseller.username || '',
+      password: reseller.password || ''
+    });
+    setEditId(reseller.id);
+    setShowForm(true);
+    window.scrollTo(0, 0);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this reseller? Their assigned sales will be kept but disassociated.")) {
+      try {
+        await apiService.deleteReseller(id);
+        fetchResellers();
+        if (selectedReseller && selectedReseller.id === id) {
+          setSelectedReseller(null);
+        }
+      } catch (err) {
+        console.error("Error deleting reseller", err);
+      }
     }
   };
 
@@ -57,14 +95,18 @@ const Resellers = () => {
           <h1>Resellers Network</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Manage your extended sales force.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
-          <UserPlus size={18} /> Add Reseller
+        <button className="btn btn-primary" onClick={() => {
+          setEditId(null);
+          setFormData({ name: '', contact: '', username: '', password: '' });
+          setShowForm(!showForm);
+        }}>
+          <UserPlus size={18} /> {showForm && !editId ? 'Cancel' : 'Add Reseller'}
         </button>
       </div>
 
       {showForm && (
         <div className="glass-panel" style={{ marginBottom: '2rem' }}>
-          <h3>New Reseller</h3>
+          <h3>{editId ? 'Edit Reseller' : 'New Reseller'}</h3>
           <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
             <div className="grid-2">
               <div className="form-group">
@@ -86,8 +128,33 @@ const Resellers = () => {
                   onChange={e => setFormData({...formData, contact: e.target.value})}
                 />
               </div>
+              <div className="form-group">
+                <label className="form-label">Username</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    required
+                    value={formData.username}
+                    onChange={e => setFormData({...formData, username: e.target.value})}
+                  />
+                  <button type="button" className="btn btn-outline" onClick={generateCredentials} style={{ whiteSpace: 'nowrap' }}>Auto Gen</button>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  required
+                  value={formData.password}
+                  onChange={e => setFormData({...formData, password: e.target.value})}
+                />
+              </div>
             </div>
-            <button type="submit" className="btn btn-success" style={{ marginTop: '1rem' }}>Save Profile</button>
+            <button type="submit" className="btn btn-success" style={{ marginTop: '1rem' }}>
+              {editId ? 'Update Profile' : 'Save Profile'}
+            </button>
           </form>
         </div>
       )}
@@ -134,13 +201,30 @@ const Resellers = () => {
           <div key={reseller.id} className="glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <h3 style={{ borderBottom: '1px solid var(--surface-border)', paddingBottom: '0.5rem' }}>{reseller.name}</h3>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Contact: {reseller.contact || 'N/A'}</span>
-            <div style={{ marginTop: '1rem' }}>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Username: {reseller.username || 'N/A'}</span>
+            <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
               <button 
                 className="btn btn-outline" 
-                style={{ width: '100%' }}
+                style={{ flex: 1 }}
                 onClick={() => setSelectedReseller(reseller)}
               >
                 View Assigned Stock / Sales
+              </button>
+              <button 
+                className="btn btn-outline" 
+                style={{ padding: '0.5rem' }}
+                onClick={() => handleEdit(reseller)}
+                title="Edit Reseller"
+              >
+                <Edit size={16} />
+              </button>
+              <button 
+                className="btn btn-outline" 
+                style={{ padding: '0.5rem', color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                onClick={() => handleDelete(reseller.id)}
+                title="Delete Reseller"
+              >
+                <Trash2 size={16} />
               </button>
             </div>
           </div>

@@ -21,6 +21,8 @@ class Reseller(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     contact = Column(String, nullable=True)
+    username = Column(String, unique=True, index=True, nullable=True)
+    password = Column(String, nullable=True)
     
     sales = relationship("Sale", back_populates="reseller")
 

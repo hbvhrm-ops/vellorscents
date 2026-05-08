@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { apiService } from '../api';
 import { TrendingUp, Users, DollarSign, AlertCircle } from 'lucide-react';
 
-const Dashboard = () => {
+const Dashboard = ({ userRole, resellerId }) => {
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalProfit: 0,
@@ -16,15 +16,27 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [salesRes, resellersRes, debtsRes] = await Promise.all([
-          apiService.getSales(),
-          apiService.getResellers(),
-          apiService.getDebts()
+        const [salesRes, resellersRes, debtsRes, productsRes] = await Promise.all([
+          apiService.getSales(userRole === 'reseller' ? resellerId : null),
+          userRole === 'admin' ? apiService.getResellers() : Promise.resolve({ data: [] }),
+          apiService.getDebts(userRole === 'reseller' ? resellerId : null),
+          apiService.getProducts()
         ]);
         
         const sales = salesRes.data;
+        const products = productsRes.data;
         const totalRevenue = sales.reduce((acc, curr) => acc + curr.total_price, 0);
-        const totalProfit = sales.reduce((acc, curr) => acc + (curr.total_price - (curr.total_cost || 0)), 0);
+        
+        let totalProfit = 0;
+        if (userRole === 'admin') {
+          totalProfit = sales.reduce((acc, curr) => acc + (curr.total_price - (curr.total_cost || 0)), 0);
+        } else {
+          totalProfit = sales.reduce((acc, curr) => {
+            const product = products.find(p => p.id === curr.product_id);
+            const resellerCost = product ? (product.wholesale_price * curr.quantity) : 0;
+            return acc + (curr.total_price - resellerCost);
+          }, 0);
+        }
         
         const debts = debtsRes.data;
         const totalDebt = debts.reduce((acc, curr) => acc + (curr.total_price - curr.amount_paid), 0);
@@ -85,6 +97,7 @@ const Dashboard = () => {
           <span className="stat-value">{stats.totalSales}</span>
         </div>
 
+        {userRole === 'admin' && (
         <div className="glass-panel stat-card">
           <div className="flex-between">
             <span className="stat-label">Active Resellers</span>
@@ -92,6 +105,7 @@ const Dashboard = () => {
           </div>
           <span className="stat-value">{stats.resellerCount}</span>
         </div>
+        )}
       </div>
       
       <div className="glass-panel">

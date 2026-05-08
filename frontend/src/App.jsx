@@ -10,22 +10,35 @@ import Login from './pages/Login';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const [resellerId, setResellerId] = useState(null);
 
   useEffect(() => {
-    const loggedInStatus = sessionStorage.getItem('isAdminLoggedIn');
-    if (loggedInStatus === 'true') {
+    const role = sessionStorage.getItem('userRole');
+    const rId = sessionStorage.getItem('resellerId');
+    if (role) {
       setIsLoggedIn(true);
+      setUserRole(role);
+      if (rId && rId !== 'null') {
+        setResellerId(parseInt(rId));
+      }
     }
   }, []);
 
-  const handleLogin = () => {
-    sessionStorage.setItem('isAdminLoggedIn', 'true');
+  const handleLogin = (role, rId) => {
+    sessionStorage.setItem('userRole', role);
+    sessionStorage.setItem('resellerId', rId);
+    setUserRole(role);
+    setResellerId(rId ? parseInt(rId) : null);
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('isAdminLoggedIn');
+    sessionStorage.removeItem('userRole');
+    sessionStorage.removeItem('resellerId');
     setIsLoggedIn(false);
+    setUserRole(null);
+    setResellerId(null);
   };
 
   if (!isLoggedIn) {
@@ -35,14 +48,14 @@ function App() {
   return (
     <Router>
       <div className="app-container">
-        <Sidebar onLogout={handleLogout} />
+        <Sidebar onLogout={handleLogout} userRole={userRole} />
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/sales" element={<Sales />} />
-            <Route path="/debts" element={<Debts />} />
-            <Route path="/resellers" element={<Resellers />} />
-            <Route path="/products" element={<Products />} />
+            <Route path="/" element={<Dashboard userRole={userRole} resellerId={resellerId} />} />
+            <Route path="/sales" element={<Sales userRole={userRole} resellerId={resellerId} />} />
+            <Route path="/debts" element={<Debts userRole={userRole} resellerId={resellerId} />} />
+            {userRole === 'admin' && <Route path="/resellers" element={<Resellers />} />}
+            <Route path="/products" element={<Products userRole={userRole} />} />
           </Routes>
         </main>
       </div>

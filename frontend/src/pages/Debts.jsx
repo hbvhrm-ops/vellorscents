@@ -3,12 +3,12 @@ import { apiService } from '../api';
 import { format } from 'date-fns';
 import { CheckCircle } from 'lucide-react';
 
-const Debts = () => {
+const Debts = ({ userRole, resellerId }) => {
   const [debts, setDebts] = useState([]);
 
   const fetchDebts = async () => {
     try {
-      const res = await apiService.getDebts();
+      const res = await apiService.getDebts(userRole === 'reseller' ? resellerId : null);
       setDebts(res.data);
     } catch (err) {
       console.error(err);
