@@ -13,10 +13,17 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     setError('');
     try {
-      const res = await apiService.authLogin({ username, password });
+      const res = await apiService.authLogin({ 
+        username: username.trim(), 
+        password: password.trim() 
+      });
       onLogin(res.data.role, res.data.reseller_id);
     } catch (err) {
-      setError('Invalid username or password');
+      if (!err.response) {
+        setError('Cannot connect to server. Is the backend running?');
+      } else {
+        setError('Invalid username or password');
+      }
     } finally {
       setLoading(false);
     }
