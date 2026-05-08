@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../api';
-import { UserPlus, X, Trash2 } from 'lucide-react';
+import { UserPlus, X, Trash2, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 
 const Resellers = () => {
@@ -55,6 +55,7 @@ const Resellers = () => {
       fetchResellers();
     } catch (err) {
       console.error(err);
+      alert(err.response?.data?.detail || "Error saving reseller profile. Ensure the username is unique.");
     }
   };
 

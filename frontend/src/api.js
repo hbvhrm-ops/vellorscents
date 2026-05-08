@@ -10,27 +10,27 @@ const api = axios.create({
 
 export const apiService = {
   // Auth
-  authLogin: (data) => api.post('/auth/login', data),
+  authLogin: (data) => api.post('/api/auth/login', data),
 
   // Sales
-  getSales: (resellerId) => api.get('/sales/', { params: { reseller_id: resellerId } }),
-  createSale: (data) => api.post('/sales/', data),
-  updateSale: (id, data) => api.put(`/sales/${id}`, data),
-  deleteSale: (id) => api.delete(`/sales/${id}`),
+  getSales: (resellerId) => api.get('/api/sales/', { params: { reseller_id: resellerId } }),
+  createSale: (data) => api.post('/api/sales/', data),
+  updateSale: (id, data) => api.put(`/api/sales/${id}`, data),
+  deleteSale: (id) => api.delete(`/api/sales/${id}`),
   
   // Debts (Unpaid Sales)
-  getDebts: (resellerId) => api.get('/debts/', { params: { reseller_id: resellerId } }),
-  payDebt: (id, amount) => api.post(`/sales/${id}/pay/`, null, { params: { amount } }),
+  getDebts: (resellerId) => api.get('/api/debts/', { params: { reseller_id: resellerId } }),
+  payDebt: (id, amount) => api.post(`/api/sales/${id}/pay/`, null, { params: { amount } }),
 
   // Resellers
-  getResellers: () => api.get('/resellers/'),
-  createReseller: (data) => api.post('/resellers/', data),
-  updateReseller: (id, data) => api.put(`/resellers/${id}`, data),
-  deleteReseller: (id) => api.delete(`/resellers/${id}`),
+  getResellers: () => api.get('/api/resellers/'),
+  createReseller: (data) => api.post('/api/resellers/', data),
+  updateReseller: (id, data) => api.put(`/api/resellers/${id}`, data),
+  deleteReseller: (id) => api.delete(`/api/resellers/${id}`),
 
   // Products
-  getProducts: () => api.get('/products/'),
-  createProduct: (data) => api.post('/products/', data),
-  updateProduct: (id, data) => api.put(`/products/${id}`, data),
-  deleteProduct: (id) => api.delete(`/products/${id}`),
+  getProducts: () => api.get('/api/products/'),
+  createProduct: (data) => api.post('/api/products/', data),
+  updateProduct: (id, data) => api.put(`/api/products/${id}`, data),
+  deleteProduct: (id) => api.delete(`/api/products/${id}`),
 };
