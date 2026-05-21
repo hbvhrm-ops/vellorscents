@@ -2,12 +2,22 @@ import axios from 'axios';
 
 // In production (Render/Vercel), VITE_API_URL is set as an env var.
 // In local dev, fall back to localhost:8000.
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : '');
+const rawApiUrl = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : '');
+const API_URL = rawApiUrl.replace(/\/+$/, ''); // Prevent duplicate slashes
 
 const api = axios.create({
   baseURL: API_URL,
   timeout: 30000, // 30 seconds to accommodate cold starts
 });
+
+// Interceptor to print out exact error payload to console
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("API Error Payload:", error.response || error.message || error);
+    return Promise.reject(error);
+  }
+);
 
 export const apiService = {
   // Auth

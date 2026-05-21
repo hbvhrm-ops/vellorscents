@@ -20,7 +20,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Perfume Sales API")
 
 # CORS — allow the Vercel frontend URL and local dev
-default_origins = "https://vellorscents.vercel.app,http://localhost:5173,http://localhost:3000"
+default_origins = "https://vellorscents.vercel.app,https://vellorscents.vercel.app/,http://localhost:5173,http://localhost:3000"
 origins = os.environ.get("ALLOWED_ORIGINS", default_origins).split(",")
 
 app.add_middleware(
