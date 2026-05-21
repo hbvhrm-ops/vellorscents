@@ -52,7 +52,7 @@ def login(request: schemas.LoginRequest, db: Session = Depends(get_db)):
     raise HTTPException(status_code=401, detail="Invalid username or password")
 
 # --- PRODUCTS ---
-@app.post("/api/products/", response_model=schemas.Product)
+@app.post("/api/products", response_model=schemas.Product)
 def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)):
     db_product = models.Product(**product.model_dump())
     db.add(db_product)
@@ -60,7 +60,7 @@ def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)
     db.refresh(db_product)
     return db_product
 
-@app.get("/api/products/", response_model=List[schemas.Product])
+@app.get("/api/products", response_model=List[schemas.Product])
 def read_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return db.query(models.Product).offset(skip).limit(limit).all()
 
@@ -85,7 +85,7 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
     return {"detail": "Product deleted successfully"}
 
 # --- RESELLERS ---
-@app.post("/api/resellers/", response_model=schemas.Reseller)
+@app.post("/api/resellers", response_model=schemas.Reseller)
 def create_reseller(reseller: schemas.ResellerCreate, db: Session = Depends(get_db)):
     db_reseller = models.Reseller(**reseller.model_dump())
     db.add(db_reseller)
@@ -93,7 +93,7 @@ def create_reseller(reseller: schemas.ResellerCreate, db: Session = Depends(get_
     db.refresh(db_reseller)
     return db_reseller
 
-@app.get("/api/resellers/", response_model=List[schemas.Reseller])
+@app.get("/api/resellers", response_model=List[schemas.Reseller])
 def read_resellers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return db.query(models.Reseller).offset(skip).limit(limit).all()
 
@@ -120,7 +120,7 @@ def update_reseller(reseller_id: int, reseller: schemas.ResellerCreate, db: Sess
     return db_reseller
 
 # --- SALES ---
-@app.post("/api/sales/", response_model=schemas.Sale)
+@app.post("/api/sales", response_model=schemas.Sale)
 def create_sale(sale: schemas.SaleCreate, db: Session = Depends(get_db)):
     db_sale = models.Sale(**sale.model_dump())
     db.add(db_sale)
@@ -128,7 +128,7 @@ def create_sale(sale: schemas.SaleCreate, db: Session = Depends(get_db)):
     db.refresh(db_sale)
     return db.query(models.Sale).filter(models.Sale.id == db_sale.id).first()
 
-@app.get("/api/sales/", response_model=List[schemas.Sale])
+@app.get("/api/sales", response_model=List[schemas.Sale])
 def read_sales(skip: int = 0, limit: int = 100, reseller_id: Optional[int] = None, db: Session = Depends(get_db)):
     query = db.query(models.Sale)
     if reseller_id is not None:
@@ -156,14 +156,14 @@ def delete_sale(sale_id: int, db: Session = Depends(get_db)):
     return {"detail": "Sale deleted successfully"}
 
 # --- DEBTS ---
-@app.get("/api/debts/", response_model=List[schemas.Sale])
+@app.get("/api/debts", response_model=List[schemas.Sale])
 def read_debts(skip: int = 0, limit: int = 100, reseller_id: Optional[int] = None, db: Session = Depends(get_db)):
     query = db.query(models.Sale).filter(models.Sale.total_price > models.Sale.amount_paid)
     if reseller_id is not None:
         query = query.filter(models.Sale.reseller_id == reseller_id)
     return query.order_by(models.Sale.date.desc()).offset(skip).limit(limit).all()
 
-@app.post("/api/sales/{sale_id}/pay/")
+@app.post("/api/sales/{sale_id}/pay")
 def pay_debt(sale_id: int, amount: float, db: Session = Depends(get_db)):
     sale = db.query(models.Sale).filter(models.Sale.id == sale_id).first()
     if not sale:
