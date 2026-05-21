@@ -55,7 +55,11 @@ const Resellers = () => {
       fetchResellers();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.detail || "Error saving reseller profile. Ensure the username is unique.");
+      if (!err.response) {
+        alert("Cannot connect to server. Is the backend running?");
+      } else {
+        alert(err.response?.data?.detail || `Server error: ${err.response.status} ${err.response.statusText}`);
+      }
     }
   };
 

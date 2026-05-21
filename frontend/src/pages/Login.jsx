@@ -21,8 +21,10 @@ const Login = ({ onLogin }) => {
     } catch (err) {
       if (!err.response) {
         setError('Cannot connect to server. Is the backend running?');
-      } else {
+      } else if (err.response.status === 401) {
         setError('Invalid username or password');
+      } else {
+        setError(`Server error: ${err.response.status} ${err.response.statusText}`);
       }
     } finally {
       setLoading(false);

@@ -30,6 +30,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/ping")
+def ping():
+    return {"status": "awake"}
+
 # --- AUTH ---
 @app.post("/api/auth/login", response_model=schemas.LoginResponse)
 def login(request: schemas.LoginRequest, db: Session = Depends(get_db)):
