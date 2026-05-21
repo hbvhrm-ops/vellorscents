@@ -1,11 +1,12 @@
 import axios from 'axios';
 
-// In production (Render), VITE_API_URL is set as an env var in the Render dashboard.
+// In production (Render/Vercel), VITE_API_URL is set as an env var.
 // In local dev, fall back to localhost:8000.
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : '');
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : '');
 
 const api = axios.create({
   baseURL: API_URL,
+  timeout: 30000, // 30 seconds to accommodate cold starts
 });
 
 export const apiService = {
