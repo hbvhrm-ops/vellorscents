@@ -7,7 +7,9 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
-    # Neon/PostgreSQL — no special connect_args needed
+    # Neon/PostgreSQL — SQLAlchemy 2.0+ requires "postgresql://" scheme instead of "postgres://"
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     engine = create_engine(DATABASE_URL)
 else:
     # Local development — SQLite
