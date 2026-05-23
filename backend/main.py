@@ -20,41 +20,45 @@ from database import engine, get_db
 models.Base.metadata.create_all(bind=engine)
 
 # Auto-migration for missing columns in existing tables (e.g. Neon PostgreSQL)
-from sqlalchemy import text
+from sqlalchemy import text, inspect
 def run_migrations():
+    # Use SQLAlchemy's built-in inspect tool to query table columns safely without database errors
+    inspector = inspect(engine)
+    
+    # 1. Migrate resellers table
+    columns_resellers = [c["name"] for c in inspector.get_columns("resellers")]
     with engine.begin() as conn:
-        # Check resellers columns
-        try:
-            conn.execute(text("SELECT username FROM resellers LIMIT 1"))
-        except Exception:
+        if "username" not in columns_resellers:
             try:
                 conn.execute(text("ALTER TABLE resellers ADD COLUMN username VARCHAR(255) UNIQUE"))
             except Exception:
                 pass
+        if "password" not in columns_resellers:
             try:
                 conn.execute(text("ALTER TABLE resellers ADD COLUMN password VARCHAR(255)"))
             except Exception:
                 pass
+        if "contact" not in columns_resellers:
             try:
                 conn.execute(text("ALTER TABLE resellers ADD COLUMN contact VARCHAR(255)"))
             except Exception:
                 pass
 
-        # Check products columns
-        try:
-            conn.execute(text("SELECT wholesale_cost_price FROM products LIMIT 1"))
-        except Exception:
-            for col in ["wholesale_price", "cost_price", "wholesale_cost_price"]:
+    # 2. Migrate products table
+    columns_products = [c["name"] for c in inspector.get_columns("products")]
+    with engine.begin() as conn:
+        for col in ["wholesale_price", "cost_price", "wholesale_cost_price"]:
+            if col not in columns_products:
                 try:
                     conn.execute(text(f"ALTER TABLE products ADD COLUMN {col} FLOAT DEFAULT 0.0"))
                 except Exception:
                     pass
 
-        # Check sales columns
-        try:
-            conn.execute(text("SELECT total_cost FROM sales LIMIT 1"))
-        except Exception:
-            for col in ["total_cost", "discount"]:
+    # 3. Migrate sales table
+    columns_sales = [c["name"] for c in inspector.get_columns("sales")]
+    with engine.begin() as conn:
+        for col in ["total_cost", "discount"]:
+            if col not in columns_sales:
                 try:
                     conn.execute(text(f"ALTER TABLE sales ADD COLUMN {col} FLOAT DEFAULT 0.0"))
                 except Exception:
