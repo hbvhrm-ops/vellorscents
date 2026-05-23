@@ -17,10 +17,50 @@ from database import engine, get_db
 # Create DB tables
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Perfume Sales API")
+# Auto-migration for missing columns in existing tables (e.g. Neon PostgreSQL)
+from sqlalchemy import text
+def run_migrations():
+    with engine.begin() as conn:
+        # Check resellers columns
+        try:
+            conn.execute(text("SELECT username FROM resellers LIMIT 1"))
+        except Exception:
+            try:
+                conn.execute(text("ALTER TABLE resellers ADD COLUMN username VARCHAR(255) UNIQUE"))
+            except Exception:
+                pass
+            try:
+                conn.execute(text("ALTER TABLE resellers ADD COLUMN password VARCHAR(255)"))
+            except Exception:
+                pass
+            try:
+                conn.execute(text("ALTER TABLE resellers ADD COLUMN contact VARCHAR(255)"))
+            except Exception:
+                pass
 
-import traceback
-from fastapi.responses import JSONResponse
+        # Check products columns
+        try:
+            conn.execute(text("SELECT wholesale_cost_price FROM products LIMIT 1"))
+        except Exception:
+            for col in ["wholesale_price", "cost_price", "wholesale_cost_price"]:
+                try:
+                    conn.execute(text(f"ALTER TABLE products ADD COLUMN {col} FLOAT DEFAULT 0.0"))
+                except Exception:
+                    pass
+
+        # Check sales columns
+        try:
+            conn.execute(text("SELECT total_cost FROM sales LIMIT 1"))
+        except Exception:
+            for col in ["total_cost", "discount"]:
+                try:
+                    conn.execute(text(f"ALTER TABLE sales ADD COLUMN {col} FLOAT DEFAULT 0.0"))
+                except Exception:
+                    pass
+
+run_migrations()
+
+app = FastAPI(title="Perfume Sales API")
 
 # CORS — explicitly allow Vercel frontend and local development
 default_origins = [
@@ -47,16 +87,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.exception_handler(Exception)
-def debug_exception_handler(request, exc):
-    return JSONResponse(
-        status_code=500,
-        content={
-            "error": str(exc),
-            "traceback": "".join(traceback.format_exception(None, exc, exc.__traceback__))
-        }
-    )
 
 @app.get("/ping")
 def ping():
