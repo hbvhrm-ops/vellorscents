@@ -4,6 +4,8 @@ import sys
 # Ensure the backend directory is always in the Python path,
 # regardless of which directory uvicorn is launched from.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import traceback
+from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -87,6 +89,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+def debug_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": str(exc),
+            "traceback": "".join(traceback.format_exception(None, exc, exc.__traceback__))
+        }
+    )
 
 @app.get("/ping")
 def ping():
