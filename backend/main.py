@@ -19,6 +19,9 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Perfume Sales API")
 
+import traceback
+from fastapi.responses import JSONResponse
+
 # CORS — explicitly allow Vercel frontend and local development
 default_origins = [
     "https://vellorscents.vercel.app",
@@ -44,6 +47,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+def debug_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": str(exc),
+            "traceback": "".join(traceback.format_exception(None, exc, exc.__traceback__))
+        }
+    )
 
 @app.get("/ping")
 def ping():
