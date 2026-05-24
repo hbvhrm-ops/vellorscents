@@ -167,7 +167,7 @@ const Products = ({ userRole }) => {
               <th>ID</th>
               <th>Perfume Name</th>
               {userRole === 'admin' ? <th>Reg Cost / Price</th> : <th>Selling Price</th>}
-              {userRole === 'admin' ? <th>Wholesale Cost / Price</th> : <th>Wholesale Price</th>}
+              {userRole === 'admin' ? <th>Wholesale Cost / Price</th> : <th>Wholesale Cost</th>}
               {userRole === 'admin' && <th>Actions</th>}
             </tr>
           </thead>
@@ -184,7 +184,7 @@ const Products = ({ userRole }) => {
                 {userRole === 'admin' ? (
                    <td data-label="Wholesale Cost / Price">PKR {(product.wholesale_cost_price || 0).toFixed(2)} / PKR {(product.wholesale_price || 0).toFixed(2)}</td>
                 ) : (
-                   <td data-label="Wholesale Price">PKR {(product.wholesale_price || 0).toFixed(2)}</td>
+                   <td data-label="Wholesale Cost">PKR {(product.wholesale_price || 0).toFixed(2)}</td>
                 )}
                 {userRole === 'admin' && (
                   <td data-label="Actions">
