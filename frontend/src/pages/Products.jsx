@@ -184,7 +184,7 @@ const Products = ({ userRole }) => {
                 {userRole === 'admin' ? (
                    <td data-label="Wholesale Cost / Price">PKR {(product.wholesale_cost_price || 0).toFixed(2)} / PKR {(product.wholesale_price || 0).toFixed(2)}</td>
                 ) : (
-                   <td data-label="Wholesale Cost">PKR {(product.wholesale_price || 0).toFixed(2)}</td>
+                   <td data-label="Wholesale Cost">PKR {(product.wholesale_cost_price || 0).toFixed(2)}</td>
                 )}
                 {userRole === 'admin' && (
                   <td data-label="Actions">
